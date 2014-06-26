@@ -36,6 +36,7 @@
 						<h3 class="panel-title">Your Rentals</h3>
 					</div>
 					<div class="panel-body">
+						<a target="_blank" href="https://www.betarigs.com/profile/rental_history">View on Betarigs.com</a>
 						<div id="current-rentals">
 							Loading...
 						</div>
@@ -144,7 +145,7 @@
           html += '<td>#</td><td>Rig</td><td>Speed (Mh/s)</td><td>Total Price</td><td>Duration</td><td>Status</td>';
           html += '</thead></tr><tbody>';
           $.each(rentals, function(i, e) {
-            html += '<tr><td>' + (i + 1) + '</td><td><a target="_blank" href="https://www.betarigs.com/rig/' + e['rig']['id'] + '">'  + e['rig']['id'] + '</a></td><td>' + (e['rig']['speed'] / 1000) + '</td><td>' + e['payment']['bitcoin']['price']['value'] + '</td><td>' + e['duration']['current_duration']['value'] + ' ' + e['duration']['current_duration']['unit'] + '</td><td>' + format_rental_status(e['status']) + '</td></tr>';
+            html += '<tr><td>' + e['id'] + '</td><td><a target="_blank" href="https://www.betarigs.com/rig/' + e['rig']['id'] + '">'  + e['rig']['id'] + '</a></td><td>' + (e['rig']['speed'] / 1000) + '</td><td>' + e['payment']['bitcoin']['price']['value'] + '</td><td>' + e['duration']['current_duration']['value'] + ' ' + e['duration']['current_duration']['unit'] + '</td><td>' + format_rental_status(e['status']) + '</td></tr>';
           });
           html += '</tbody></table>';
           return html;
@@ -193,7 +194,7 @@
           	$('#rental-output').text('');
 
             if (data['errors'].length === 0) {
-            	window.location.reload(true);
+            	$('#rental-output').html("Rigs have successfully been rented and paid for!");
             }
             else {
             	$('#rental-output').html(data['errors'].length + ' rig' + (data['errors'].length > 1 ? 's' : '') + ' not rented due to error' + (data['errors'].length > 1 ? 's' : '') + '  below.<ul style="padding-left:18px"></ul>')

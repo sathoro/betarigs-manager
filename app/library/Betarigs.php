@@ -18,7 +18,8 @@ class Betarigs {
 				curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-				'X-Api-Key: ' . $_ENV['BETARIGS_API_KEY']
+				'X-Api-Key: ' . $_ENV['BETARIGS_API_KEY'],
+				'Content-Type: application/json'
 			));
 		}
 		elseif ($include_key) {
@@ -28,6 +29,7 @@ class Betarigs {
 		}
 
 		$data = curl_exec($ch);
+		$decoded = json_decode($data, true);
 
 		if (empty(curl_error($ch))) {
 			$status_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -39,8 +41,11 @@ class Betarigs {
 					case 404:
 						$error = "Error: That rig doesn't exist! (this can also occur if the minimum price is not met)";
 						break;
+					case 400:
+						$error = "Error: {$decoded['error']['message']}";
+						break;
 					default:
-						$error = "Unknown error occured with the Betarigs API, status code {$resp['status_code']}";
+						$error = "Unknown error occured with the Betarigs API, status code $status_code";
 						break;
 				}
 
@@ -54,8 +59,6 @@ class Betarigs {
 		}
 
 		curl_close($ch);
-
-		$decoded = json_decode($data, true);
 
 		return is_array($decoded) ? array('success' => true, 'json' => $decoded) : array('success' => true, 'json' => array());
 	}

@@ -1,13 +1,16 @@
 <?php
 
-if (!Cache::has('installed')) file_get_contents(url('/install'));
-
 Route::get('/', function() {
 	if (empty($_ENV['BETARIGS_API_KEY']) ||
 		empty($_ENV['COINBASE_API_KEY']) ||
-		empty($_ENV['COINBASE_API_SECRET'])) {
+		empty($_ENV['COINBASE_API_SECRET']))
+	{
 		return View::make('error');
 	}
+
+	$algorithms = Cache::remember('algorithms', 60, function() {
+	    return Betarigs::algorithms();
+	});
 
 	$rentals = Betarigs::get_rentals();
 	if (!$rentals['success']) {
@@ -15,7 +18,7 @@ Route::get('/', function() {
 	}
 
 	return View::make('home', array(
-		'algorithms' => Cache::get('algorithms'),
+		'algorithms' => $algorithms,
 		'rentals' => $rentals['json']
 	));
 });
@@ -70,11 +73,13 @@ Route::post('do-rent', function() {
 	$hrs = intval(Input::get('hrs'));
 	$errors = array();
 	$coinbase = Coinbase::withApiKey($_ENV['COINBASE_API_KEY'], $_ENV['COINBASE_API_SECRET']);
+	$success = false;
 
 	foreach($rigs as $rig) {
 		$resp = Betarigs::rent($rig, $hrs);
 		if (!$resp['success']) $errors[] = $resp['error'];
 		else {
+			$success = true;
 			$resp = $resp['json'];
 			if ($resp['payment']['bitcoin']['price']['unit'] != 'BTC') {
 				$errors[] = "Payment unit not in Bitcoin";
@@ -93,6 +98,8 @@ Route::post('do-rent', function() {
 		}
 	}
 
+	if ($success) file_get_contents(url('update-pools'));
+
 	return array('errors' => $errors);
 });
 
@@ -101,25 +108,23 @@ Route::post('pool-settings', function() {
 	Cache::forever('pool_username', Input::get('pool_username'));
 	Cache::forever('pool_password', Input::get('pool_password'));
 
+	file_get_contents(url('update-pools'));
+
+	return "";
+});
+
+Route::get('update-pools', function() {
 	foreach(Betarigs::get_rentals()['json'] as $rental) {
 		if (!in_array($rental['status'], array('executing', 'waiting_payment', 'waiting_payment_confirmation'))) {
 			continue;
 		}
 
 		Betarigs::update_pool($rental['id'], $rental['rig']['id'], array(
-			'url' => Cache::get('pool_url'), 'worker_name' => Cache::get('pool_username'), 'worker_password' => Cache::get('pool_password')
+			'url' => Cache::get('pool_url'), 
+			'worker_name' => Cache::get('pool_username'), 
+			'worker_password' => Cache::get('pool_password')
 		));
 	}
 
 	return "";
-});
-
-Route::get('install', function() {
-	Cache::forget('algorithms');
-
-	Cache::rememberForever('algorithms', function() {
-	    return Betarigs::algorithms();
-	});
-
-	Cache::forever('installed', '1');
 });
