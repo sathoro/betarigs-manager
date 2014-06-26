@@ -12,7 +12,10 @@ class Betarigs {
 
 		if ($type != "GET") {
 			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $type);
-			curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+			if ($type == "PUT")
+				curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($body));
+			else
+				curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			curl_setopt($ch, CURLOPT_HTTPHEADER, array(
 				'X-Api-Key: ' . $_ENV['BETARIGS_API_KEY']
@@ -41,10 +44,12 @@ class Betarigs {
 						break;
 				}
 
+				curl_close($ch);
 				return array('success' => false, 'error' => $error);
 			}
 		}
 		else {
+			curl_close($ch);
 			return array('success' => false, 'error' => "CURL error: {$resp['curl_error']}");
 		}
 
@@ -60,7 +65,7 @@ class Betarigs {
 	}
 
 	public static function update_pool($rental_id, $rig_id, $pool_details) {
-		$body = json_encode(array('rig' => array('id' => $rig_id), 'pool' => $pool_details));
+		$body = array('rig' => array('id' => $rig_id), 'pool' => $pool_details);
 		return self::request("/api/v1/rental/$rental_id.json", array(), true, "PUT", $body);
 	}
 
