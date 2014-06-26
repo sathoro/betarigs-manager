@@ -3,7 +3,7 @@
 @section('content')
 	<div class="container">
 		<div class="row">
-			<div class="col-md-4">
+			<div class="col-lg-4">
 				<div class="panel panel-primary">
 					<div class="panel-heading">
 						<h3 class="panel-title">Pool Settings</h3>
@@ -43,7 +43,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="col-md-4">
+			<div class="col-lg-4">
 				<div class="panel panel-primary">
 					<div class="panel-heading">
 						<h3 class="panel-title">Rental Form</h3>
@@ -90,7 +90,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="col-md-4">
+			<div class="col-lg-4">
 				<div class="panel panel-primary">
 					<div class="panel-heading">
 						<h3 class="panel-title">Rental Options</h3>
@@ -142,10 +142,10 @@
 
           var html = '<table class="table">';
           html += '<thead><tr>';
-          html += '<td>#</td><td>Rig</td><td>Speed (Mh/s)</td><td>Total Price</td><td>Duration</td><td>Status</td>';
+          html += '<td>#</td><td>Rig</td><td>Duration</td><td>Pool Info</td><td>Status</td>';
           html += '</thead></tr><tbody>';
           $.each(rentals, function(i, e) {
-            html += '<tr><td>' + e['id'] + '</td><td><a target="_blank" href="https://www.betarigs.com/rig/' + e['rig']['id'] + '">'  + e['rig']['id'] + '</a></td><td>' + (e['rig']['speed'] / 1000) + '</td><td>' + e['payment']['bitcoin']['price']['value'] + '</td><td>' + e['duration']['current_duration']['value'] + ' ' + e['duration']['current_duration']['unit'] + '</td><td>' + format_rental_status(e['status']) + '</td></tr>';
+            html += '<tr><td>' + e['id'] + '</td><td><a target="_blank" href="https://www.betarigs.com/rig/' + e['rig']['id'] + '">'  + e['rig']['id'] + '</a></td><td>' + e['duration']['current_duration']['value'] + ' ' + e['duration']['current_duration']['unit'] + '</td><td>' + e['pool']['url'] + '<br/>' + e['pool']['worker_name'] + '<br/>' + e['pool']['worker_password'] + '</td><td>' + format_rental_status(e['status']) + '</td></tr>';
           });
           html += '</tbody></table>';
           return html;
