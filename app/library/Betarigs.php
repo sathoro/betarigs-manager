@@ -9,24 +9,24 @@ class Betarigs {
 
 		$ch = curl_init($url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		$headers = array();
 
 		if ($type != "GET") {
+			$headers[] = 'X-Api-Key: ' . $_ENV['BETARIGS_API_KEY'];
 			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $type);
 			if ($type == "PUT")
 				curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($body));
-			else
+			else {
+				$headers[] = 'Content-Type: application/json';
 				curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+			}
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-				'X-Api-Key: ' . $_ENV['BETARIGS_API_KEY'],
-				'Content-Type: application/json'
-			));
 		}
 		elseif ($include_key) {
-			curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-				'X-Api-Key: ' . $_ENV['BETARIGS_API_KEY']
-			));
+			$headers[] = 'X-Api-Key: ' . $_ENV['BETARIGS_API_KEY'];
 		}
+
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
 		$data = curl_exec($ch);
 		$decoded = json_decode($data, true);
