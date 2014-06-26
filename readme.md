@@ -4,6 +4,6 @@ Created for the [Betarigs API challenge](https://bitcointalk.org/index.php?topic
 
 No database necessary. Just open `EXAMPLE.env.php` and set your Betarigs API key, Coinbase API key, and Coinbase API secret and then rename the file to `.env.php` (the dot before `env` is important!). The Coinbase API key only needs sending permissions.
 
-
+Most of the custom code for this application is in `app/routes.php` and `app/library/Betarigs.php`.
 
 ![Screenshot](http://i.imgur.com/l8j4lXw.png)
