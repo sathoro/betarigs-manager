@@ -66,7 +66,6 @@ class Betarigs {
 
 	public static function rent($rig_id, $duration) {
 		$body = '{"rig":{"id":'.$rig_id.'},"duration":{"value":'.$duration.', "unit":"hour"}}';
-		dd($body);
 		return self::request("/api/v1/rental.json", array(), true, "POST", $body);
 	}
 
