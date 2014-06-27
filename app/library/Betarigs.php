@@ -73,7 +73,12 @@ class Betarigs {
 	}
 
 	public static function rent($rig_id, $duration) {
-		$body = '{"rig":{"id":'.$rig_id.'},"duration":{"value":'.$duration.', "unit":"hour"}}';
+		$body = json_encode(array(
+			'rig' => array('id' => $rig_id), 
+			'duration' => array('value' => $duration, 'unit' => 'hour'),
+			'pool' => array('url' => Cache::get('pool_url'), 'workername' => Cache::get('pool_username'), 'workerpassword' => Cache::get('pool_password'))
+		));
+
 		return self::request("/api/v1/rental.json", array(), true, "POST", $body);
 	}
 

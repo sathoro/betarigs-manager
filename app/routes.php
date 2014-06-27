@@ -12,8 +12,12 @@ Route::get('/', function() {
 	    return Betarigs::algorithms();
 	});
 
-	$rentals = Betarigs::get_rentals();
+	$rentals = Cache::remember('rentals', 30, function() {
+	    return Betarigs::get_rentals();
+	});
+
 	if (!$rentals['success']) {
+		Cache::forget('rentals');
 		return Redirect::to('error')->with('message', $rentals['error']);
 	}
 
@@ -73,13 +77,11 @@ Route::post('do-rent', function() {
 	$hrs = intval(Input::get('hrs'));
 	$errors = array();
 	$coinbase = Coinbase::withApiKey($_ENV['COINBASE_API_KEY'], $_ENV['COINBASE_API_SECRET']);
-	$success = false;
 
 	foreach($rigs as $rig) {
 		$resp = Betarigs::rent($rig, $hrs);
 		if (!$resp['success']) $errors[] = $resp['error'];
 		else {
-			$success = true;
 			$resp = $resp['json'];
 			if ($resp['payment']['bitcoin']['price']['unit'] != 'BTC') {
 				$errors[] = "Payment unit not in Bitcoin";
@@ -98,7 +100,7 @@ Route::post('do-rent', function() {
 		}
 	}
 
-	if ($success) file_get_contents(url('update-pools'));
+	Cache::forget('rentals');
 
 	return array('errors' => $errors);
 });
@@ -109,6 +111,8 @@ Route::post('pool-settings', function() {
 	Cache::forever('pool_password', Input::get('pool_password'));
 
 	file_get_contents(url('update-pools'));
+
+	Cache::forget('rentals');
 
 	return "";
 });
